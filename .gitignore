@@ -27,3 +27,4 @@ Thumbs.db
 
 # Large data/debug files
 server/ghost-trips-backup-*.json
+actions-runner/
