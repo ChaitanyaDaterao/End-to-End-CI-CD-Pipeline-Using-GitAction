@@ -1,0 +1,7 @@
+node_modules
+*.log
+.env
+.git
+debug*.js
+fix-*.js
+cleanup*.js

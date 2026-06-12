@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./server
+    container_name: bms-server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/bms
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongo
+    networks:
+      - bms-network
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: bms-client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - bms-network
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6-jammy
+    container_name: bms-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - bms-network
+    restart: unless-stopped
+
+networks:
+  bms-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
