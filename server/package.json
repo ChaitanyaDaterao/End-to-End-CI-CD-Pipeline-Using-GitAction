@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "test": "jest --passWithNoTests",
     "dev": "nodemon index.js"
   },
   "dependencies": {
@@ -15,6 +16,8 @@
     "mongoose": "^8.0.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "jest": "^30.4.2",
+    "nodemon": "^3.0.2",
+    "supertest": "^7.2.2"
   }
 }
