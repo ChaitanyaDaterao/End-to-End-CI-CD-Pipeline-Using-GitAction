@@ -1,0 +1,6 @@
+apiVersion: v2
+name: murum-bms
+description: Helm chart for Murum BMS (React + Node/Express + MongoDB)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

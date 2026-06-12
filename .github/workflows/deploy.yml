@@ -1,0 +1,77 @@
+name: Deploy to Kubernetes (Helm)
+
+on:
+  workflow_run:
+    workflows: ["Build, Test & Scan"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+    environment:
+      name: production
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+      RELEASE_NAME: murum
+      CHART_PATH: ./charts/murum-bms
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify minikube status
+        run: |
+          minikube status
+          kubectl cluster-info
+
+      - name: Helm lint
+        run: helm lint ${{ env.CHART_PATH }}
+
+      - name: Deploy / Upgrade release
+        run: |
+          helm upgrade --install ${{ env.RELEASE_NAME }} ${{ env.CHART_PATH }} \
+            --set image.tag=${{ env.IMAGE_TAG }} \
+            --wait --timeout 5m
+
+      - name: Verify rollout
+        run: |
+          kubectl get pods -l release=${{ env.RELEASE_NAME }}
+          kubectl rollout status deployment/${{ env.RELEASE_NAME }}-server --timeout=120s
+          kubectl rollout status deployment/${{ env.RELEASE_NAME }}-client --timeout=120s
+
+      - name: Output service access info
+        run: |
+          minikube service ${{ env.RELEASE_NAME }}-client --url
+
+  notify:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "*Deploy to Kubernetes* — ${{ github.repository }}",
+              "attachments": [
+                {
+                  "color": "${{ needs.deploy.result == 'success' && 'good' || 'danger' }}",
+                  "fields": [
+                    { "title": "Status", "value": "${{ needs.deploy.result }}", "short": true },
+                    { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
+                    { "title": "Image Tag", "value": "${{ github.sha }}", "short": true },
+                    { "title": "Run", "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

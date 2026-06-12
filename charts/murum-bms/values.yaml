@@ -1,0 +1,60 @@
+image:
+  registry: ghcr.io
+  repository: chaitanyadaterao/end-to-end-ci-cd-pipeline-using-gitaction
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+server:
+  name: server
+  replicaCount: 1
+  port: 5000
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    NODE_ENV: production
+    PORT: "5000"
+    MONGO_URI: "mongodb://mongo:27017/murum"
+  envSecretName: server-secrets
+
+client:
+  name: client
+  replicaCount: 1
+  port: 80
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30080
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+
+mongo:
+  enabled: true
+  name: mongo
+  image: mongo:6.0
+  port: 27017
+  service:
+    type: ClusterIP
+    port: 27017
+  persistence:
+    enabled: true
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

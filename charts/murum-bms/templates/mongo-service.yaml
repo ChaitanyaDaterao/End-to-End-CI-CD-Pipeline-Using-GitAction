@@ -1,0 +1,18 @@
+{{- if .Values.mongo.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.mongo.name }}
+  labels:
+    app: {{ .Values.mongo.name }}
+    {{- include "murum.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.mongo.service.type }}
+  selector:
+    app: {{ .Values.mongo.name }}
+    release: {{ .Release.Name }}
+  ports:
+    - port: {{ .Values.mongo.service.port }}
+      targetPort: {{ .Values.mongo.port }}
+      protocol: TCP
+{{- end }}

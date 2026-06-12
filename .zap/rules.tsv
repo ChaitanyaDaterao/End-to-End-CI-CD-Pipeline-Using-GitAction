@@ -1,0 +1,7 @@
+# ZAP scanning rules - tune alert thresholds
+# Format: <rule-id>	<threshold>	<comment>
+# Threshold options: IGNORE, INFO, WARN, FAIL
+#
+# Example: ignore informational CSP findings on a demo app
+10038	WARN	Content Security Policy
+10063	WARN	Permissions Policy Header Not Set

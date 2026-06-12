@@ -1,0 +1,15 @@
+{{- if and .Values.mongo.enabled .Values.mongo.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.mongo.name }}-pvc
+  labels:
+    app: {{ .Values.mongo.name }}
+    {{- include "murum.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mongo.persistence.size }}
+{{- end }}

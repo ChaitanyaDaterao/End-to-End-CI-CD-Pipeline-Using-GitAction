@@ -1,0 +1,18 @@
+Murum BMS deployed!
+
+Check pod status:
+  kubectl get pods -l release={{ .Release.Name }}
+
+{{- if eq .Values.client.service.type "NodePort" }}
+Access the client via minikube:
+  minikube service {{ .Release.Name }}-{{ .Values.client.name }}
+{{- else if eq .Values.client.service.type "LoadBalancer" }}
+Get the external IP:
+  kubectl get svc {{ .Release.Name }}-{{ .Values.client.name }}
+{{- else }}
+Port-forward to access the client:
+  kubectl port-forward svc/{{ .Release.Name }}-{{ .Values.client.name }} 8080:{{ .Values.client.service.port }}
+{{- end }}
+
+Server is reachable internally at: server:{{ .Values.server.service.port }}
+Mongo is reachable internally at: mongo:{{ .Values.mongo.service.port }}

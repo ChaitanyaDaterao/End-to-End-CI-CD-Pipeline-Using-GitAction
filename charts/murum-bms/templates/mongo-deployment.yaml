@@ -1,0 +1,41 @@
+{{- if .Values.mongo.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.mongo.name }}
+  labels:
+    app: {{ .Values.mongo.name }}
+    {{- include "murum.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Values.mongo.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mongo.name }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Values.mongo.name }}
+          image: {{ .Values.mongo.image }}
+          ports:
+            - containerPort: {{ .Values.mongo.port }}
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          resources:
+            {{- toYaml .Values.mongo.resources | nindent 12 }}
+      volumes:
+        - name: mongo-data
+          {{- if .Values.mongo.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-{{ .Values.mongo.name }}-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}
