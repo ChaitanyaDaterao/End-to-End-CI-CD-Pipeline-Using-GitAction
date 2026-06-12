@@ -9,6 +9,7 @@ const app = express();
 connectDB();
 
 app.use(cors());
+app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.use(express.json());
 
 // --- 1. ALL API ROUTES ---
