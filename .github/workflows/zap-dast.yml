@@ -22,11 +22,14 @@ jobs:
           echo "url=http://$IP:30080" >> "$GITHUB_OUTPUT"
 
       - name: ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: ${{ steps.target.outputs.url }}
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
-          allow_issue_writing: false
-          fail_action: false
-          artifact_name: 'zap-results'
+        run: |
+          docker run --rm -v $(pwd):/zap/wrk/:rw --network=host \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t ${{ steps.target.outputs.url }} \
+            -J report_json.json -w report_md.md -r report_html.html \
+            -a || true
+
+      - name: Print scan summary
+        run: |
+          echo "## ZAP Scan Results" >> $GITHUB_STEP_SUMMARY
+          cat report_md.md >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No report generated" >> $GITHUB_STEP_SUMMARY
