@@ -46,7 +46,7 @@ jobs:
 
       - name: Output service access info
         run: |
-          minikube service ${{ env.RELEASE_NAME }}-client --url
+          kubectl get svc murum-client
 
   notify:
     name: Slack Notification
