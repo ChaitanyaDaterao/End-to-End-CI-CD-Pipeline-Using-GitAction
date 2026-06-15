@@ -29,9 +29,4 @@ jobs:
           cmd_options: '-a'
           allow_issue_writing: false
           fail_action: false
-
-      - name: Upload ZAP report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: report_html.html
+          artifact_name: 'zap-results'
